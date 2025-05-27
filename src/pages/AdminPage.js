@@ -1,86 +1,125 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom'; // 더 이상 AdminPage에서 직접 사용하지 않음
+import { db } from '../firebase'; // Firebase 설정 파일 경로에 맞게 수정
+import {
+  collection,
+  doc,
+  deleteDoc,
+  updateDoc,
+  onSnapshot,
+  addDoc,
+  setDoc,
+  query,
+  orderBy
+} from 'firebase/firestore';
 
 function AdminPage() {
-  const navigate = useNavigate();
+  // const navigate = useNavigate(); // 삭제: PrivateRoute가 인증 관리
 
   const [applications, setApplications] = useState([]);
   const [waitingList, setWaitingList] = useState([]);
-  const [maxCapacity, setMaxCapacity] = useState(50); // 기본 최대 인원 수
+  const [maxCapacity, setMaxCapacity] = useState(50);
   const [selectedSchool, setSelectedSchool] = useState('all');
   const [selectedDormType, setSelectedDormType] = useState('all');
   const [searchName, setSearchName] = useState('');
   const [isClosed, setIsClosed] = useState(false);
 
+  const [settingsDocRef, setSettingsDocRef] = useState(null);
+
   useEffect(() => {
-    if (!localStorage.getItem('isAdminLoggedIn')) {
-      navigate('/admin/login');
-    }
-    const storedApps = JSON.parse(localStorage.getItem('applications')) || [];
-    setApplications(storedApps);
+    const unsubscribeApps = onSnapshot(query(collection(db, 'applications'), orderBy('timestamp', 'asc')), (snapshot) => {
+      const apps = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setApplications(apps);
+    });
 
-    const storedWaiting = JSON.parse(localStorage.getItem('waitingList')) || [];
-    setWaitingList(storedWaiting);
+    const unsubscribeWaiting = onSnapshot(query(collection(db, 'waitingList'), orderBy('timestamp', 'asc')), (snapshot) => {
+      const waiting = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setWaitingList(waiting);
+    });
 
-    const storedMax = parseInt(localStorage.getItem('maxCapacity'), 10);
-    if (!isNaN(storedMax)) setMaxCapacity(storedMax);
+    const settingsRef = doc(db, 'settings', 'appSettings');
+    setSettingsDocRef(settingsRef);
 
-    const closedState = localStorage.getItem('applicationsClosed') === 'true';
-    setIsClosed(closedState);
-  }, [navigate]);
-
-  const handleLogout = () => {
-    localStorage.removeItem('isAdminLoggedIn');
-    navigate('/admin/login');
-  };
-
-  const handleCancel = (index, fromWaiting = false) => {
-    if (window.confirm('이 신청을 정말 취소하시겠습니까?')) {
-      if (fromWaiting) {
-        const updatedWaiting = [...waitingList];
-        updatedWaiting.splice(index, 1);
-        setWaitingList(updatedWaiting);
-        localStorage.setItem('waitingList', JSON.stringify(updatedWaiting));
+    const unsubscribeSettings = onSnapshot(settingsRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        setMaxCapacity(data.maxCapacity || 50);
+        setIsClosed(data.isClosed !== undefined ? data.isClosed : false);
       } else {
-        const updatedApps = [...applications];
-        updatedApps.splice(index, 1);
-        setApplications(updatedApps);
-        localStorage.setItem('applications', JSON.stringify(updatedApps));
+        console.log("No appSettings document found, creating with default values.");
+        setDoc(settingsRef, { maxCapacity: 50, isClosed: false, timestamp: Date.now() })
+          .then(() => {
+            setMaxCapacity(50);
+            setIsClosed(false);
+          })
+          .catch(error => console.error("Error creating appSettings document:", error));
+      }
+    });
 
-        // 신청자 중 한 명 취소 시 대기자 중 첫 번째를 신청자 목록으로 이동시키기
-        if (waitingList.length > 0) {
-          const nextApplicant = waitingList[0];
-          const newWaiting = waitingList.slice(1);
-          setWaitingList(newWaiting);
-          localStorage.setItem('waitingList', JSON.stringify(newWaiting));
+    return () => {
+      unsubscribeApps();
+      unsubscribeWaiting();
+      unsubscribeSettings();
+    };
+  }, []);
 
-          const newApplications = [...updatedApps, nextApplicant];
-          setApplications(newApplications);
-          localStorage.setItem('applications', JSON.stringify(newApplications));
+  const handleCancel = async (appToCancel, fromWaiting = false) => {
+    if (window.confirm('이 신청을 정말 취소하시겠습니까?')) {
+      try {
+        if (fromWaiting) {
+          await deleteDoc(doc(db, 'waitingList', appToCancel.id));
+          alert('대기 신청이 취소되었습니다.');
+        } else {
+          await deleteDoc(doc(db, 'applications', appToCancel.id));
+          alert('신청이 취소되었습니다.');
+
+          if (waitingList.length > 0) {
+            const nextApplicant = waitingList[0];
+            await deleteDoc(doc(db, 'waitingList', nextApplicant.id));
+
+            const { id, ...dataToMove } = nextApplicant;
+
+            await addDoc(collection(db, 'applications'), {
+              ...dataToMove,
+              movedFromWaiting: true,
+              timestamp: Date.now()
+            });
+            alert(`${nextApplicant.name}님을 대기 목록에서 신청 목록으로 이동했습니다.`);
+          }
         }
+      } catch (error) {
+        console.error('취소 처리 중 오류 발생:', error);
+        alert('취소 중 오류가 발생했습니다: ' + error.message);
       }
     }
   };
 
-  const toggleClose = () => {
-    setIsClosed((prev) => {
-      localStorage.setItem('applicationsClosed', !prev);
-      return !prev;
-    });
+  const toggleClose = async () => {
+    if (settingsDocRef) {
+      try {
+        await updateDoc(settingsDocRef, { isClosed: !isClosed });
+      } catch (error) {
+        console.error('신청 마감/오픈 상태 업데이트 중 오류 발생:', error);
+        alert('상태 업데이트 중 오류가 발생했습니다: ' + error.message);
+      }
+    }
   };
 
-  const handleMaxCapacityChange = (e) => {
+  const handleMaxCapacityChange = async (e) => {
     const val = parseInt(e.target.value, 10);
-    if (!isNaN(val) && val > 0) {
-      setMaxCapacity(val);
-      localStorage.setItem('maxCapacity', val);
+    if (!isNaN(val) && val > 0 && settingsDocRef) {
+      try {
+        await updateDoc(settingsDocRef, { maxCapacity: val });
+      } catch (error) {
+        console.error('최대 인원 업데이트 중 오류 발생:', error);
+        alert('최대 인원 업데이트 중 오류가 발생했습니다: ' + error.message);
+      }
     }
   };
 
   const schools = ['all', '이화여고', '이화외고', '졸업생', '기타'];
   const dormTypes = ['all', '기숙사', '야자', '해당없음'];
 
-  // 신청자 필터링
   const filteredApplications = applications.filter((app) => {
     if (selectedSchool !== 'all' && app.schoolType !== selectedSchool) return false;
     if (selectedSchool === '이화여고' && selectedDormType !== 'all' && app.dormitoryStatus !== selectedDormType) return false;
@@ -88,7 +127,6 @@ function AdminPage() {
     return true;
   });
 
-  // 대기자 필터링 (같은 조건 적용)
   const filteredWaiting = waitingList.filter((app) => {
     if (selectedSchool !== 'all' && app.schoolType !== selectedSchool) return false;
     if (selectedSchool === '이화여고' && selectedDormType !== 'all' && app.dormitoryStatus !== selectedDormType) return false;
@@ -96,10 +134,49 @@ function AdminPage() {
     return true;
   });
 
+  // --- 엑셀 다운로드 함수 추가 ---
+  const downloadAsExcel = (data, filename = '신청자_목록') => {
+    // CSV 헤더 설정 (필요한 컬럼명)
+    const headers = [
+      "이름", "학번", "전화번호", "학교 구분", "기숙사/야자",
+      "기숙사/야자 번호", "이벤트 ID", "신청 시간"
+    ];
+
+    // 데이터를 CSV 형식으로 변환 (헤더 + 각 행의 데이터)
+    const csvContent = [
+      headers.join(','), // 헤더 행
+      ...data.map(row =>
+        [
+          `"${row.name}"`, // 이름 (쉼표 등 포함될 수 있으므로 따옴표 처리)
+          `"${row.studentId}"`, // 학번
+          `"${row.phone}"`, // 전화번호
+          `"${row.schoolType || '기타'}"`, // 학교 구분
+          `"${row.dormitoryStatus || '-'}"`, // 기숙사/야자
+          `"${row.dormitoryPhone || '-'}"`, // 기숙사/야자 번호
+          `"${row.eventId || '-'}"`, // 이벤트 ID
+          `"${new Date(row.timestamp).toLocaleString()}"` // 신청 시간
+        ].join(',')
+      )
+    ].join('\n');
+
+    // Blob 객체 생성 및 다운로드 링크 생성
+    const blob = new Blob(["\ufeff", csvContent], { type: 'text/csv;charset=utf-8;' }); // BOM 추가하여 한글 깨짐 방지
+    const link = document.createElement('a');
+    if (link.download !== undefined) { // HTML5 download 속성 지원 확인
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `${filename}_${new Date().toLocaleDateString('ko-KR')}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
   return (
     <div>
-      <h2>관리자 페이지</h2>
-      <button onClick={handleLogout}>로그아웃</button>
+      {/* <h2>관리자 페이지</h2> */}
+      {/* 로그아웃 버튼은 AdminDashboard로 이동 */}
 
       <div style={{ margin: '20px 0' }}>
         <button
@@ -121,7 +198,7 @@ function AdminPage() {
 
       <div style={{ margin: '20px 0' }}>
         <label>
-          최대 신청 인원 수:{''}
+          최대 신청 인원 수:{' '}
           <input
             type="number"
             value={maxCapacity}
@@ -177,6 +254,14 @@ function AdminPage() {
       )}
 
       <h3>신청자 목록 ({filteredApplications.length}명)</h3>
+      {/* 엑셀 다운로드 버튼 추가: 신청자 목록 */}
+      <button
+        onClick={() => downloadAsExcel(filteredApplications, '신청자_목록')}
+        style={{ marginBottom: '10px', padding: '8px 15px', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
+      >
+        신청자 목록 엑셀 다운로드
+      </button>
+
       {filteredApplications.length === 0 ? (
         <p>신청자가 없습니다.</p>
       ) : (
@@ -200,8 +285,8 @@ function AdminPage() {
             </tr>
           </thead>
           <tbody>
-            {filteredApplications.map((app, idx) => (
-              <tr key={idx}>
+            {filteredApplications.map((app) => (
+              <tr key={app.id}>
                 <td>{app.name}</td>
                 <td>{app.studentId}</td>
                 <td>{app.phone}</td>
@@ -211,7 +296,7 @@ function AdminPage() {
                 <td>{app.eventId}</td>
                 <td>{new Date(app.timestamp).toLocaleString()}</td>
                 <td>
-                  <button onClick={() => handleCancel(idx, false)}>취소</button>
+                  <button onClick={() => handleCancel(app, false)}>취소</button>
                 </td>
               </tr>
             ))}
@@ -220,6 +305,14 @@ function AdminPage() {
       )}
 
       <h3 style={{ marginTop: '40px' }}>대기자 목록 ({filteredWaiting.length}명)</h3>
+      {/* 엑셀 다운로드 버튼 추가: 대기자 목록 */}
+      <button
+        onClick={() => downloadAsExcel(filteredWaiting, '대기자_목록')}
+        style={{ marginBottom: '10px', padding: '8px 15px', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
+      >
+        대기자 목록 엑셀 다운로드
+      </button>
+
       {filteredWaiting.length === 0 ? (
         <p>대기자가 없습니다.</p>
       ) : (
@@ -244,8 +337,8 @@ function AdminPage() {
           </thead>
           <tbody>
             {filteredWaiting.map((app, idx) => (
-              <tr key={idx}>
-                <td>{idx}</td>
+              <tr key={app.id}>
+                <td>{idx + 1}</td>
                 <td>{app.name}</td>
                 <td>{app.studentId}</td>
                 <td>{app.phone}</td>
@@ -254,7 +347,7 @@ function AdminPage() {
                 <td>{app.dormitoryPhone || '-'}</td>
                 <td>{new Date(app.timestamp).toLocaleString()}</td>
                 <td>
-                  <button onClick={() => handleCancel(idx, true)}>취소</button>
+                  <button onClick={() => handleCancel(app, true)}>취소</button>
                 </td>
               </tr>
             ))}
