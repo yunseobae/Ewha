@@ -208,7 +208,7 @@ function ApplicationForm() {
     <Container component="main" maxWidth="sm" sx={{ mt: 8 }}>
       <Paper elevation={3} sx={{ p: 4, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <Typography component="h1" variant="h5" sx={{ mb: 3 }}>
-          이벤트 신청서 작성 {/* 제목 유지 */}
+          이화의 밤 신청서 작성 {/* 제목 유지 */}
         </Typography>
 
         {/* 5. 오류/성공 메시지 UI 유지 */}
@@ -227,7 +227,7 @@ function ApplicationForm() {
         {/* 6. 신청 마감 여부에 따른 UI 분기 유지 */}
         {isClosed ? (
           <Typography variant="h6" color="error" align="center">
-            현재 신청이 마감되었습니다.
+            현재 신청기간이 아닙니다다.
           </Typography>
         ) : (
           // 7. 신청 폼 UI만 남기고, 조회/수정 관련 UI 제거
@@ -269,7 +269,7 @@ function ApplicationForm() {
             />
 
             <FormControl fullWidth margin="normal" required>
-              <InputLabel id="schoolType-label">학교 구분</InputLabel>
+              <InputLabel id="schoolType-label">소속속</InputLabel>
               <Select
                 labelId="schoolType-label"
                 id="schoolType"
@@ -289,7 +289,7 @@ function ApplicationForm() {
             {formData.schoolType === '이화여고' && (
               <>
                 <FormControl fullWidth margin="normal">
-                  <InputLabel id="dormitoryStatus-label">기숙사/야자 구분</InputLabel>
+                  <InputLabel id="dormitoryStatus-label">기숙사/야자</InputLabel>
                   <Select
                     labelId="dormitoryStatus-label"
                     id="dormitoryStatus"

@@ -68,7 +68,7 @@ function EventList() {
         minute: '2-digit',
       });
     }
-    return '날짜 미정'; // Timestamp가 없거나 유효하지 않으면 '날짜 미정' 반환
+    return ''; // Timestamp가 없거나 유효하지 않으면 '날짜 미정' 반환
   };
 
   // 로딩 중일 때 표시할 UI
@@ -102,7 +102,7 @@ function EventList() {
           이화의 밤 신청
         </Typography>
         <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-          아래 목록에서 신청하고자 하는 이벤트를 선택해주세요.
+          아래 목록에서 신청하고자 하는 행사를 선택해주세요.
         </Typography>
 
         {events.length > 0 ? ( // 이벤트가 하나라도 있을 경우 리스트 렌더링
@@ -123,7 +123,7 @@ function EventList() {
         ) : ( // 이벤트가 없을 경우 메시지 표시
           <Box sx={{ mt: 3, p: 2, border: '1px dashed #ccc', borderRadius: '8px', width: '100%', textAlign: 'center' }}>
             <Typography variant="body1" color="text.secondary">
-              현재 진행 중인 이벤트가 없습니다.
+              현재 진행 중인 행사가 없습니다.
             </Typography>
           </Box>
         )}

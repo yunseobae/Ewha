@@ -41,13 +41,13 @@ const MainLayout = ({ children }) => {
           >
             {/* React Router Link와 MUI Button을 함께 사용하여 스타일을 유지하며 라우팅 */}
             <Button color="inherit" component={RouterLink} to="/">
-              홈으로
+              홈
             </Button>
           </Typography>
 
           {/* 내비게이션 버튼들 */}
-          <Button color="inherit" component={RouterLink} to="/events"> {/* 예시: 이벤트 목록 페이지 */}
-            이벤트 목록
+          <Button color="inherit" component={RouterLink} to="/eventId/apply"> {/* 예시: 이벤트 목록 페이지 */}
+            신청
           </Button>
           <Button color="inherit" component={RouterLink} to="/admin/login">
             관리자 로그인

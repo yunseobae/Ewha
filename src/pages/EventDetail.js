@@ -78,7 +78,7 @@ function EventDetail() {
   }
 
   const formatDate = (timestamp) => {
-    if (!timestamp) return '날짜 미정';
+    if (!timestamp) return '';
     const date = new Date(timestamp);
     return date.toLocaleDateString('ko-KR', {
       year: 'numeric',
