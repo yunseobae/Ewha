@@ -8,9 +8,9 @@ const theme = createTheme({
     primary: {
       // 주 색상: 앱의 주요 요소(버튼, 앱 바 등)에 사용됩니다.
       // Material Design Blue 계열의 색상으로, 신뢰감 있고 시원한 느낌을 줍니다.
-      main: '#1976d2', // 다크 블루 (MUI 기본 primary.main과 유사)
-      light: '#42a5f5', // 더 밝은 블루
-      dark: '#115293',  // 더 어두운 블루
+      main: '#00664F', // 다크 블루 (MUI 기본 primary.main과 유사)
+      light: '#00CC66', // 더 밝은 블루
+      dark: '#003300',  // 더 어두운 블루
       contrastText: '#fff', // 주 색상 위에 잘 보이는 텍스트 색상 (흰색)
     },
     secondary: {

@@ -46,7 +46,7 @@ const MainLayout = ({ children }) => {
           </Typography>
 
           {/* 내비게이션 버튼들 */}
-          <Button color="inherit" component={RouterLink} to="/eventId/apply"> {/* 예시: 이벤트 목록 페이지 */}
+          <Button color="inherit" component={RouterLink} to="/eventId/27dwHXwF0Xn3Ivef8CLu/apply"> {/* 예시: 이벤트 목록 페이지 */}
             신청
           </Button>
           <Button color="inherit" component={RouterLink} to="/admin/login">

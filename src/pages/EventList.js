@@ -57,20 +57,7 @@ function EventList() {
   };
 
   // Firebase Timestamp 객체를 사람이 읽기 쉬운 날짜 문자열로 변환하는 헬퍼 함수
-  const formatDate = (timestamp) => {
-    if (timestamp && typeof timestamp.toDate === 'function') {
-      const date = timestamp.toDate(); // Firebase Timestamp를 JavaScript Date 객체로 변환
-      return date.toLocaleDateString('ko-KR', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      });
-    }
-    return ''; // Timestamp가 없거나 유효하지 않으면 '날짜 미정' 반환
-  };
-
+ 
   // 로딩 중일 때 표시할 UI
   if (loading) {
     return (
@@ -78,7 +65,7 @@ function EventList() {
         <Box display="flex" justifyContent="center" alignItems="center" minHeight="50vh">
           <CircularProgress />
           <Typography variant="h6" sx={{ ml: 2 }}>
-            이벤트 목록을 불러오는 중...
+            목록을 불러오는 중...
           </Typography>
         </Box>
       </Container>
@@ -99,7 +86,7 @@ function EventList() {
     <Container component="main" maxWidth="sm" sx={{ mt: 8 }}>
       <Paper elevation={3} sx={{ p: 4, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <Typography component="h1" variant="h4" gutterBottom>
-          7th 이화의 밤 신청
+          이화의 밤 신청
         </Typography>
         <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
           아래 목록에서 신청하고자 하는 행사를 선택해주세요.
@@ -112,7 +99,6 @@ function EventList() {
                 <ListItemButton onClick={() => handleEventClick(event.id)}>
                   <ListItemText
                     primary={event.title}
-                    secondary={`날짜: ${formatDate(event.date)}`}
                     primaryTypographyProps={{ variant: 'h6' }}
                     secondaryTypographyProps={{ variant: 'body2', color: 'text.secondary' }}
                   />

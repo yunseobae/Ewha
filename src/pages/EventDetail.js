@@ -77,17 +77,7 @@ function EventDetail() {
     );
   }
 
-  const formatDate = (timestamp) => {
-    if (!timestamp) return '';
-    const date = new Date(timestamp);
-    return date.toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
+
 
   return (
     <Container component="main" maxWidth="md" sx={{ mt: 8 }}>
@@ -100,9 +90,6 @@ function EventDetail() {
         </Typography>
         <Typography variant="body1" sx={{ mt: 2 }}>
           {event.description}
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-          날짜: {formatDate(event.date)}
         </Typography>
         <Typography variant="body2" color="text.secondary">
           장소: {event.location}
@@ -118,11 +105,11 @@ function EventDetail() {
               navigate(`/event/${id}/apply`)
             }} // 신청 페이지로 이동 (이벤트 ID 포함)
           >
-            이화의 밤밤 신청하기
+            이화의 밤 신청하기
           </Button>
           <Button
-            variant="outlined"
-            color="secondary"
+            variant="contained"
+            color="primary"
             size="large"
             onClick={() => navigate(`/check`)} // 신청 조회 및 수정 페이지로 이동. EventDetail에서 바로 학번/비번으로 조회하므로 eventId는 필요 없음.
           >

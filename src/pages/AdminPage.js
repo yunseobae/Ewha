@@ -248,7 +248,7 @@ function AdminPage() {
           <Grid item xs={12} md={6}>
             <Button
               variant="contained"
-              color={isClosed ? 'error' : 'success'}
+              color={isClosed ? 'error' : 'primary'}
               onClick={toggleClose}
               sx={{ mr: 2 }}
             >
@@ -278,7 +278,7 @@ function AdminPage() {
       {/* 필터링 및 검색 섹션 */}
       <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
         <Typography variant="h5" gutterBottom>
-          필터링 및 검색
+          검색
         </Typography>
         <Grid container spacing={2} alignItems="center">
           <Grid item xs={12} sm={6} md={4}>
@@ -339,7 +339,7 @@ function AdminPage() {
           </Typography>
           <Button
             variant="contained"
-            color="success"
+            color="primary"
             startIcon={<DownloadIcon />}
             onClick={() => downloadAsExcel(filteredApplications, '신청자_목록')}
           >
@@ -359,7 +359,6 @@ function AdminPage() {
                   <TableCell>학교 구분</TableCell>
                   <TableCell>기숙사/야자</TableCell>
                   <TableCell>기숙사/야자 번호</TableCell>
-                  <TableCell>이벤트 ID</TableCell>
                   <TableCell>신청 시간</TableCell>
                   <TableCell>취소</TableCell>
                 </TableRow>
@@ -373,7 +372,6 @@ function AdminPage() {
                     <TableCell>{app.schoolType || '기타'}</TableCell>
                     <TableCell>{app.dormitoryStatus || '-'}</TableCell>
                     <TableCell>{app.dormitoryPhone || '-'}</TableCell>
-                    <TableCell>{app.eventId}</TableCell>
                     <TableCell>{new Date(app.timestamp).toLocaleString()}</TableCell>
                     <TableCell>
                       <IconButton
