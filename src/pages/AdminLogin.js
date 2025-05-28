@@ -5,6 +5,15 @@ import { useNavigate } from 'react-router-dom';
 import { signInWithEmailAndPassword } from 'firebase/auth'; // <-- 이렇게 변경
 import { db, auth } from '../firebase'; // Firebase 초기화 인스턴스 임포트 (auth도 함께)
 import { doc, getDoc } from 'firebase/firestore'; // Firestore에서 사용자 권한 확인용
+import {
+  Box,        // 레이아웃을 위한 기본 컨테이너 (div 역할)
+  TextField,  // 텍스트 입력 필드
+  Button,     // 버튼
+  Typography, // 텍스트 (h1, p 등)
+  Container,  // 고정 너비 컨테이너
+  Alert,      // 경고 메시지
+  CircularProgress, // 로딩 스피너 // 요소들을 가로 또는 세로로 쌓을 때 사용
+} from '@mui/material';
 
 function AdminLogin() {
   const navigate = useNavigate();
@@ -52,38 +61,62 @@ function AdminLogin() {
     }
   };
 
-  return (
-    <div style={{ maxWidth: '300px', margin: 'auto', paddingTop: '100px' }}>
-      <h2>관리자 로그인</h2>
-      <form onSubmit={handleLogin}>
-        <div>
-          <label htmlFor="email">이메일 (아이디):</label>
-          <input
+ return (
+    <Container component="main" maxWidth="xs" sx={{ mt: 8 }}> {/* maxWidth로 너비 제한, mt는 margin-top */}
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}
+      >
+        <Typography component="h1" variant="h5" sx={{ mb: 3 }}> {/* mb는 margin-bottom */}
+          관리자 로그인
+        </Typography>
+        <Box component="form" onSubmit={handleLogin} noValidate sx={{ mt: 1 }}>
+          <TextField
+            margin="normal"
+            required
+            fullWidth
             id="email"
-            type="email"
+            label="이메일 주소"
+            name="email"
+            autoComplete="email"
+            autoFocus
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            required
-            autoComplete="email"
           />
-        </div>
-        <div>
-          <label htmlFor="password">비밀번호:</label>
-          <input
-            id="password"
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            name="password"
+            label="비밀번호"
             type="password"
+            id="password"
+            autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            required
-            autoComplete="current-password"
           />
-        </div>
-        {error && <p style={{ color: 'red' }}>{error}</p>}
-        <button type="submit" disabled={loading}>
-          {loading ? '로그인 중...' : '로그인'}
-        </button>
-      </form>
-    </div>
+
+          {error && (
+            <Alert severity="error" sx={{ mt: 2, mb: 1 }}> {/* Alert 컴포넌트 사용 */}
+              {error}
+            </Alert>
+          )}
+
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            sx={{ mt: 3, mb: 2 }}
+            disabled={loading}
+          >
+            {loading ? <CircularProgress size={24} color="inherit" /> : '로그인'}
+          </Button>
+        </Box>
+      </Box>
+    </Container>
   );
 }
 
