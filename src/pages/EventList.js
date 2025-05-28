@@ -99,7 +99,7 @@ function EventList() {
     <Container component="main" maxWidth="sm" sx={{ mt: 8 }}>
       <Paper elevation={3} sx={{ p: 4, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <Typography component="h1" variant="h4" gutterBottom>
-          이화의 밤 신청
+          7th 이화의 밤 신청
         </Typography>
         <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
           아래 목록에서 신청하고자 하는 행사를 선택해주세요.

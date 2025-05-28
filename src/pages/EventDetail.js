@@ -118,7 +118,7 @@ function EventDetail() {
               navigate(`/event/${id}/apply`)
             }} // 신청 페이지로 이동 (이벤트 ID 포함)
           >
-            이벤트 신청하기
+            이화의 밤밤 신청하기
           </Button>
           <Button
             variant="outlined"
