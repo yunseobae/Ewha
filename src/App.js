@@ -11,6 +11,7 @@ import AdminLogin from './pages/AdminLogin';
 import AdminPage from './pages/AdminPage';
 import SuccessPage from './pages/SuccessPage';
 import PrivateRoute from './pages/PrivateRoute';
+import NoticePage from './pages/NoticePage';
 // import NotFound from './pages/NotFound'; // 404 페이지가 있다면 임포트
 
 // MainLayout 컴포넌트 임포트
@@ -28,6 +29,7 @@ function App() {
         <Route path="/event/:id" element={<MainLayout><EventDetail /></MainLayout>} />
         <Route path="/event/:id/apply" element={<MainLayout><ApplicationForm /></MainLayout>} />
         <Route path="/success" element={<MainLayout><SuccessPage /></MainLayout>} />
+        <Route path="notice/:id" element={<MainLayout><NoticePage /></MainLayout>} /> 
         {/* 새로 추가된 신청 조회 및 수정 페이지 라우트 */}
         <Route path="/check" element={<MainLayout><ApplicationCheckAndEdit /></MainLayout>} />
 

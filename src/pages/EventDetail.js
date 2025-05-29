@@ -54,7 +54,7 @@ function EventDetail() {
         <Box display="flex" justifyContent="center" alignItems="center" minHeight="50vh">
           <CircularProgress />
           <Typography variant="h6" sx={{ ml: 2 }}>
-            이벤트 정보를 불러오는 중...
+            정보를 불러오는 중...
           </Typography>
         </Box>
       </Container>
@@ -77,6 +77,10 @@ function EventDetail() {
     );
   }
 
+  const handleNoticeClick = () => {
+    navigate(`/notice/${id}`)
+  };
+
 
 
   return (
@@ -97,6 +101,14 @@ function EventDetail() {
 
         <Box sx={{ mt: 4, display: 'flex', gap: 2, justifyContent: 'center' }}>
           <Button
+           variant="contained"
+           color="primary"
+           size="large"
+           onClick={handleNoticeClick}
+          >
+            공지 및 송리스트
+          </Button>
+          <Button
             variant="contained"
             color="primary"
             size="large"
@@ -105,7 +117,7 @@ function EventDetail() {
               navigate(`/event/${id}/apply`)
             }} // 신청 페이지로 이동 (이벤트 ID 포함)
           >
-            이화의 밤 신청하기
+            신청
           </Button>
           <Button
             variant="contained"
@@ -113,7 +125,7 @@ function EventDetail() {
             size="large"
             onClick={() => navigate(`/check`)} // 신청 조회 및 수정 페이지로 이동. EventDetail에서 바로 학번/비번으로 조회하므로 eventId는 필요 없음.
           >
-            신청 조회 및 수정
+            조회 및 수정
           </Button>
         </Box>
       </Paper>

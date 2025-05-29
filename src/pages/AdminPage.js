@@ -40,6 +40,7 @@ import DeleteIcon from '@mui/icons-material/Delete'; // 삭제 아이콘
 import DownloadIcon from '@mui/icons-material/Download'; // 다운로드 아이콘
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'; // 상태 아이콘
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'; // 상태 아이콘
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 
 function AdminPage() {
   const [applications, setApplications] = useState([]);
@@ -147,7 +148,28 @@ function AdminPage() {
       }
     }
   };
+  const handleMoveToApplications = async (applicantToMove) => {
+    if (window.confirm(`${applicantToMove.name} 님을 대기 목록에서 신청 목록으로 이동하시겠습니까?`)) {
+      try {
+        // 1. 대기 목록에서 해당 문서 삭제
+        await deleteDoc(doc(db, 'waitingList', applicantToMove.id));
 
+        // 2. 신청 목록으로 문서 추가 (ID는 Firestore가 자동으로 생성하도록 addDoc 사용)
+        const { id, ...dataToMove } = applicantToMove; // 기존 ID는 제외하고 데이터만 복사
+        await addDoc(collection(db, 'applications'), {
+          ...dataToMove,
+          movedFromWaiting: true, // 대기에서 이동됨을 표시하는 필드 추가
+          timestamp: Date.now() // 이동 시 새로운 타임스탬프 설정
+        });
+
+        setActionMessage(`success: ${applicantToMove.name}님을 대기 목록에서 신청 목록으로 이동했습니다.`);
+      } catch (moveError) {
+        console.error('대기자 이동 중 오류 발생:', moveError);
+        setActionMessage('error: 대기자 이동 중 오류가 발생했습니다: ' + moveError.message);
+      }
+    }
+  };
+  
   const toggleClose = async () => {
     if (settingsDocRef) {
       try {
@@ -398,7 +420,7 @@ function AdminPage() {
           </Typography>
           <Button
             variant="contained"
-            color="success"
+            color="primary"
             startIcon={<DownloadIcon />}
             onClick={() => downloadAsExcel(filteredWaiting, '대기자_목록')}
           >
@@ -420,6 +442,7 @@ function AdminPage() {
                   <TableCell>기숙사/야자</TableCell>
                   <TableCell>기숙사/야자 번호</TableCell>
                   <TableCell>신청 시간</TableCell>
+                  <TableCell>신청자 전환</TableCell>
                   <TableCell>취소</TableCell>
                 </TableRow>
               </TableHead>
@@ -434,6 +457,15 @@ function AdminPage() {
                     <TableCell>{app.dormitoryStatus || '-'}</TableCell>
                     <TableCell>{app.dormitoryPhone || '-'}</TableCell>
                     <TableCell>{new Date(app.timestamp).toLocaleString()}</TableCell>
+                    <TableCell>
+                      <IconButton
+                        aria-label="move-to-applications"
+                        color="primary" // 성공적인 작업을 나타내는 색상
+                        onClick={() => handleMoveToApplications(app)}
+                      >
+                        <ArrowForwardIcon fontSize="small" />
+                      </IconButton>
+                    </TableCell>
                     <TableCell>
                       <IconButton
                         aria-label="cancel"

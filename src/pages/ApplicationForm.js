@@ -269,7 +269,7 @@ function ApplicationForm() {
             />
 
             <FormControl fullWidth margin="normal" required>
-              <InputLabel id="schoolType-label">소속속</InputLabel>
+              <InputLabel id="schoolType-label">소속</InputLabel>
               <Select
                 labelId="schoolType-label"
                 id="schoolType"
