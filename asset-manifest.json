@@ -1,10 +1,10 @@
 {
   "files": {
-    "main.js": "/Ewha/static/js/main.7397da06.js",
+    "main.js": "/Ewha/static/js/main.87b26e96.js",
     "index.html": "/Ewha/index.html",
-    "main.7397da06.js.map": "/Ewha/static/js/main.7397da06.js.map"
+    "main.87b26e96.js.map": "/Ewha/static/js/main.87b26e96.js.map"
   },
   "entrypoints": [
-    "static/js/main.7397da06.js"
+    "static/js/main.87b26e96.js"
   ]
 }
